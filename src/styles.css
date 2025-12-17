@@ -1,0 +1,173 @@
+﻿/*
+  src/styles.css
+  Basic responsive styles for the bingo app. Touch-friendly sizes.
+*/
+:root{
+  --bg:#0f1724;
+  --card:#ffffff;
+  --accent:#06b6d4;
+}
+html,body,#root{height:100%;}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;background:linear-gradient(180deg,#07102a,var(--bg));color:#fff}
+.topbar{padding:12px 16px;background:rgba(255,255,255,0.03);display:flex;align-items:center}
+.topbar h1{margin:0;font-size:1.2rem}
+.main{display:flex;gap:12px;padding:12px}
+.left{width:320px;min-width:260px}
+.right{flex:1;display:flex;align-items:flex-start;justify-content:center}
+.uploader{background:rgba(255,255,255,0.03);padding:12px;border-radius:8px}
+.controls{margin-top:12px;background:rgba(255,255,255,0.03);padding:12px;border-radius:8px}
+.card-view{background:var(--card);color:#111;padding:12px;border-radius:8px;max-width:900px;width:100%}
+.grid{display:grid;gap:6px}
+.cell{background:#f8fafc;padding:10px;border-radius:6px;text-align:center;font-weight:600}
+.cell.dab{background:linear-gradient(90deg,#fde68a,#fca5a5)}
+.player-row{display:flex;gap:8px;align-items:center}
+.player-row input{flex:1;padding:6px}
+.ball-current{font-size:2rem;font-weight:700;padding:10px}
+.history{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px}
+.ball{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#ffffff;color:#111}
+@media(max-width:800px){
+  .main{flex-direction:column}
+  .left{width:100%}
+}
+
+/* Grid designer preview */
+.grid-designer-overlay { position:absolute; border:2px dashed #00A; background:rgba(0,160,255,0.06) }
+.grid-designer-cell { border:2px solid rgba(0,0,0,0.18); font-size:18px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.9); color:#012 }
+.grid-outline-highlight { border:3px solid #f59e0b !important; box-shadow:0 6px 18px rgba(245,158,11,0.12) }
+.designer-divider { position:absolute; background:rgba(0,0,0,0.55); opacity:0.9 }
+.designer-divider.horizontal { height:6px; left:0; right:0; cursor:ns-resize }
+.designer-divider.vertical { width:6px; top:0; bottom:0; cursor:ew-resize }
+.designer-corner-handle { position:absolute; width:12px; height:12px; background:#f59e0b; border-radius:2px; opacity:0.9 }
+
+/* Make the grid designer modal match the card-view look and keep contents contained */
+ .grid-designer-modal { box-shadow: 0 10px 40px rgba(0,0,0,0.45); padding: 14px; background: rgba(6,34,58,0.95); color:#fff; border-radius:8px; display:flex; flex-direction:column; border:1px solid rgba(255,255,255,0.04) }
+.grid-designer-image-container { position: relative; border:1px solid rgba(255,255,255,0.06); border-radius:6px; overflow:auto; display:flex; align-items:center; justify-content:center; background:transparent; height:100%; width:100% }
+.grid-designer-image-container img { display:block; max-width:100%; max-height:100%; height:auto; width:auto }
+.grid-designer-controls { display:flex; flex-direction:column; gap:8px }
+
+/* Allow user to resize the modal container by dragging the corner */
+.grid-designer-modal { resize: both; overflow: auto; box-sizing: border-box; min-width:520px; min-height:360px }
+.grid-designer-modal::after { content:''; position:absolute; right:8px; bottom:8px; width:14px; height:14px; pointer-events:none; }
+
+.grid-designer-controls-panel { padding:12px; border:1px solid rgba(255,255,255,0.06); border-radius:6px; background:transparent; color:#fff }
+.grid-designer-header h3 { color:#fff }
+.btn-muted{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#fff;padding:6px 10px;border-radius:6px}
+.btn-primary{background:var(--accent);border:none;color:#062; padding:6px 10px;border-radius:6px}
+
+/* ensure overlays and elements stay within the image container */
+.grid-designer-image-container .grid-designer-cell{ background: rgba(255,255,255,0.92); color:#012 }
+.grid-designer-image-container .designer-divider{ opacity:0.95 }
+
+/* Card view overlay (after grid saved) */
+.card-overlay { border: 2px solid rgba(255,255,255,0.35); background: rgba(255,255,255,0.02); pointer-events:auto }
+.card-overlay-cell { border:1px solid rgba(255,255,255,0.06); box-sizing:border-box; background: rgba(255,255,255,0.00); position: relative; overflow: visible }
+/* Dab visuals: make dabs look like rounded ink drops with subtle highlight and depth */
+.card-overlay-cell.dab {
+  /* center a round ink drop inside the cell */
+  background: rgba(0,0,0,0);
+  border: none;
+}
+.card-overlay-cell.dab::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 66%;
+  height: 66%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, rgba(5,150,105,0.98) 0%, rgba(5,150,105,0.88) 28%, rgba(5,150,105,0.6) 55%, rgba(5,150,105,0.18) 100%);
+  box-shadow: 0 6px 14px rgba(5,150,105,0.12), inset 0 -6px 12px rgba(0,0,0,0.18);
+  border: 1px solid rgba(5,150,105,0.45);
+  pointer-events: none;
+}
+/* small secondary highlight to simulate ink spread */
+.card-overlay-cell.dab::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -12%);
+  width: 36%;
+  height: 36%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 25% 25%, rgba(255,255,255,0.22), rgba(255,255,255,0.02) 35%, rgba(255,255,255,0) 70%);
+  filter: blur(1px);
+  pointer-events: none;
+}
+.card-overlay-cell:hover { outline: 2px solid rgba(6,34,58,0.6); }
+
+/* player labels */
+.player-label { font-weight:700; font-size:12px; text-align:center; }
+.player-label.col { transform-origin:center; }
+
+
+
+/* Dab Overlay (left-side inline control) */
+.dab-overlay-card{ border-radius:8px; }
+.dab-overlay-card .btn-primary{ padding:6px 10px }
+.dab-overlay-card .btn-muted{ padding:6px 10px }
+.dab-overlay-card input{ background: transparent; color:#fff; border:1px solid rgba(255,255,255,0.06); padding:4px 6px; border-radius:4px }
+/* Make select values visible and options dark-blue for readability */
+
+/* Game On pulsing/shine animation */
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 0 rgba(11,61,145,0); transform: scale(1); }
+  50% { box-shadow: 0 0 28px rgba(11,61,145,0.55); transform: scale(1.03); }
+  100% { box-shadow: 0 0 0 rgba(11,61,145,0); transform: scale(1); }
+}
+.btn-pulse {
+  animation: pulseGlow 2.8s ease-in-out infinite;
+  position: relative;
+}
+/* subtle shimmer overlay using pseudo-element */
+.btn-pulse::after {
+  content: '';
+  position: absolute;
+  left: -6px;
+  right: -6px;
+  top: -6px;
+  bottom: -6px;
+  border-radius: 8px;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02), rgba(255,255,255,0.06));
+  opacity: 0.0;
+  transition: opacity 0.6s ease-in-out;
+}
+.btn-pulse:hover { transform: scale(1.04) }
+.btn-pulse:hover::after { opacity: 0.7 }
+
+.dab-overlay-card select, .dab-overlay-card select option { color: #0b3d91 }
+.dab-overlay-header strong{ color:#fff }
+.dab-overlay-card { background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.03) }
+.defaults-row { display:flex; align-items:center; gap:8px }
+@media(max-width:640px){ .defaults-row { flex-direction:column; align-items:flex-start } }
+
+/* Balls in Play grid styles */
+.balls-grid { }
+.balls-grid-inner .ball-cell { transition: background 200ms ease, transform 120ms ease }
+.balls-grid-inner .ball-cell.current { transform: scale(1.04); box-shadow: 0 6px 18px rgba(245,158,11,0.12) }
+/* Called numbers: dim the cell background and color the number itself red for clarity */
+.balls-grid-inner .ball-cell.called { background: rgba(0,0,0,0.14); border-color: rgba(255,255,255,0.04); color: rgba(255,255,255,0.6); }
+.balls-grid-inner .ball-cell.called span { color: #ef4444; font-weight:800; }
+
+/* Responsive layout: place grid below on small screens */
+@media (max-width:800px) {
+  .bingo-ball-flex { flex-direction: column-reverse; align-items: stretch }
+  .balls-grid { width:100% }
+  .balls-grid-inner { grid-template-columns: repeat(8,1fr) }
+}
+@media (min-width:801px) {
+  .balls-grid-inner { grid-template-columns: repeat(10,1fr) }
+}
+
+/* Sound toggle in topbar */
+.sound-toggle{ position:relative; width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; color:#fff; background:transparent; border:1px solid rgba(255,255,255,0.06); border-radius:6px }
+.sound-toggle svg{ width:18px; height:18px }
+.sound-toggle.muted{ background: rgba(255,255,255,0.02) }
+.sound-toggle.muted::after{ content:''; position:absolute; left:8%; right:8%; top:48%; height:2px; background:#ef4444; transform: rotate(-22deg); border-radius:2px }
+.sound-toggle:focus{ outline:2px solid rgba(255,255,255,0.06) }
+
+
+
+

@@ -1,0 +1,38 @@
+{
+  "name": "bingo-caller-pro",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "tesseract.js": "^4.1.1",
+    "canvas-confetti": "^1.5.1",
+    "html2canvas": "^1.4.1"
+  },
+  "homepage": "https://75Dman.github.io/BingoCaller",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
+    "predeploy-scan": "node tools/predeploy-scan.js",
+    "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+    "gh-pages": "^5.0.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

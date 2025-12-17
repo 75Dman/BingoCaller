@@ -1,0 +1,15 @@
+﻿{
+  "completed": [
+    "Project scaffolded",
+    "Image upload + OCR hook",
+    "Card view with editable cells",
+    "Player naming",
+    "Ball picker with history",
+    "Auto/manual dab modes",
+    "Win detection and confetti",
+    "LocalStorage persistence",
+    "Documentation (README, overview)"
+  ],
+  "todo": [],
+  "notes": "OCR accuracy depends on image quality; manual edit fallback is provided. The app is client-side only and ready for local testing with npm install + npm start."
+}
