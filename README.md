@@ -46,13 +46,13 @@ Notes & deployment checklist
   - What it checks: common secret patterns (API keys, private key headers, bearer tokens), tracked `.env*` files, and large committed files (>2MB). It will also optionally run `npm test` (single-run under `CI=true`) and `npm audit --audit-level=moderate` when applicable. Note: `npm audit` findings are reported as **warnings only** (non-blocking) so that transitive vulnerabilities do not automatically stop deploys — review and fix them as part of maintenance.
   - How to use: run `npm run predeploy-scan` locally or add it as a step in your CI workflow; the script exits non-zero on any failures (except audit warnings) so CI will stop the deploy when actual blocking checks fail.
 
-- The repository contains `eng.traineddata` (Tesseract English traineddata), a binary language model used by Tesseract/Tesseract.js for OCR.
-  - File: `eng.traineddata`
+- The repository contains `eng.traineddata` (Tesseract English traineddata), a binary language model used by Tesseract/Tesseract.js for OCR; it has been placed in the `public/` folder so it will be served by GitHub Pages after deployment.
+  - File: `public/eng.traineddata`
   - Size: ~23 MB (checked in place)
   - Purpose: Provides the English recognition model for OCR; often sourced from the Tesseract tessdata project.
   - License: many tessdata files are Apache-2.0, but verify the original source if you plan to redistribute the file publicly.
   - Notes: Keeping this file in the repo increases clone size; it is safe to keep if you prefer local availability. Alternatives include hosting it externally (GitHub Releases, S3, CDN) and fetching at runtime — Tesseract.js supports loading language data from a URL.
 
-Per your request, `eng.traineddata` is retained in the repository as-is.
+Per your request, `eng.traineddata` is retained in the repository and moved to `public/` so it's accessible to the deployed site.
 
 If you'd like, I can also add instructions for hosting `eng.traineddata` externally and modify `ImageUploader`/OCR loader to fetch it on demand (optional).
