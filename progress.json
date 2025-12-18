@@ -10,6 +10,91 @@
     "LocalStorage persistence",
     "Documentation (README, overview)"
   ],
-  "todo": [],
+  "todo": [
+    {
+      "title": "Allow the user to number the card from highest to lowest",
+      "done": false,
+      "tags": ["web:19"],
+      "created": "2025-12-18"
+    },
+    {
+      "title": "Save completed card + called numbers to a folder on the user's device at end of game",
+      "done": false,
+      "tags": ["web:19"],
+      "created": "2025-12-18"
+    },
+    {
+      "title": "Indicate when viewers have all numbers dabbed except one",
+      "done": false,
+      "tags": ["web:19"],
+      "created": "2025-12-18"
+    },
+    {
+      "title": "Announce picked bingo ball out loud",
+      "done": false,
+      "tags": ["web:19"],
+      "created": "2025-12-18"
+    },
+    {
+      "title": "Enable in-game pen color and line thickness for writing on the bingo card",
+      "done": false,
+      "tags": ["web:19"],
+      "created": "2025-12-18"
+    },
+    {
+      "title": "Highlight winning row when someone wins",
+      "done": false,
+      "tags": ["web:19"],
+      "created": "2025-12-18"
+    },
+    {
+      "title": "Make player names look more handwritten",
+      "done": false,
+      "tags": ["web:19"],
+      "created": "2025-12-18"
+    },
+    {
+      "title": "Add light and dark mode setting",
+      "done": false,
+      "tags": ["web:19"],
+      "created": "2025-12-18"
+    },
+    {
+      "title": "Add save feature to store multiple bingo cards",
+      "done": false,
+      "tags": ["web:19"],
+      "created": "2025-12-18"
+    },
+    {
+      "title": "Allow game to continue after first winner for multiple prizes",
+      "done": false,
+      "tags": ["web:19"],
+      "created": "2025-12-18"
+    },
+    {
+      "title": "Add automatic ball drawing until winner with adjustable speed",
+      "done": false,
+      "tags": ["web:19"],
+      "created": "2025-12-18"
+    },
+    {
+      "title": "Add play, pause, and stop controls for automatic ball drawing",
+      "done": false,
+      "tags": ["web:19"],
+      "created": "2025-12-18"
+    },
+    {
+      "title": "Add 'Last One Standing' alternate win mode",
+      "done": false,
+      "tags": ["web:19"],
+      "created": "2025-12-18"
+    },
+    {
+      "title": "(Wish) Allow freehand custom overlays for non-standard card layouts",
+      "done": false,
+      "tags": ["web:19"],
+      "created": "2025-12-18"
+    }
+  ],
   "notes": "OCR accuracy depends on image quality; manual edit fallback is provided. The app is client-side only and ready for local testing with npm install + npm start."
 }

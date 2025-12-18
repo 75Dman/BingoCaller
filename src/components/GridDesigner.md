@@ -83,11 +83,27 @@
 ---
 
 ## TODOs and possible improvements
-- Improve touch support: attach `pointerdown`/`pointermove`/`pointerup` for better cross-device handling.
+- Improve touch support: attach `pointerdown`/`pointermove`/`pointerup` for better cross-device handling. (Implemented)
+- Mobile: the designer now opens full-screen on narrow viewports (<=640px) so the image preview has priority and controls move below the preview; the overlay covers the full viewport from left→right and top→bottom so the bingo card fills the screen and the user must scroll down to access dab settings / defaults and player settings / defaults. The component detects small screens at runtime (window width <= 640px) via `window.matchMedia('(max-width:640px)')` and switches to a true fullscreen modal where the image preview consumes the visible viewport height and controls are stacked underneath. Divider hit targets are slightly increased for touch and the modal padding and corners are optimized for small screens.
+- Default overlay type: the default `overlayType` now defaults to **`both`** (player labels + dab overlay) unless overridden in your saved `grid` or `gridDefaults`.
+- Unsaved preview indicator: when you draw or modify a grid, a small **"Preview — Unsaved"** badge appears in the preview area so mobile users know the overlay isn't persisted until they press **Save Grid**.
+- Label clamping: row/column player labels are now clamped so they do not render far off the left/top of the overlay on small screens. Also, designer now clamps saved `rowOffset`/`colOffset` to the overlay size so saved grids are more likely to display labels correctly on small devices.
+- Save on mobile: minimum cell size threshold is reduced on narrow viewports so valid small grids can be saved from handheld devices.
 - Add small draggable corner handles for an easier resize affordance on touch devices.
 - Provide keyboard nudging for divider positions and allow undo/redo for divider moves.
 - Consider persisting the image as base64 (or storing uploads in persistent blob storage) so image URLs survive reloads.
 - Add unit tests for `generateSequential`, `computeBboxPct`, and gutter boundary conditions.
+
+---
+
+## Mobile testing steps (quick)
+1. Open the app on a phone or in DevTools device emulator (choose a width <= 520px).
+2. Open **Design Dab Grid** — the modal should occupy the full screen and the image preview should take most of the space.
+3. Draw a bounding box; drag dividers and labels with touch and ensure labels remain visible and clamped to the overlay edge.
+4. If cells appear small, you should still be able to save; Save will be disabled only if cells are too small for reliable interaction.
+5. After saving, open the card in the main view to verify overlay alignment and label placement.
+
+**Testing helper:** there is a temporary **Force mobile** toggle in the designer header (button labeled **Force mobile**; when active it reads **Mobile (forced)**) that forces the mobile/layout preview so you can test behavior without an actual handset; the toggle is intended to be removed after testing.
 
 ---
 

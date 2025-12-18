@@ -33,7 +33,7 @@ export default function PlayerList({ playersRows, setPlayersRows, playersCols, s
           {(playersRows || []).map((p,i)=> (
             <div key={i} style={{display:'flex',gap:8,alignItems:'center',marginBottom:6}}>
               <label style={{width:60}}>Row {i+1}</label>
-              <input value={p ?? ''} onChange={(e)=>update(setPlayersRows, playersRows, i, e.target.value)} />
+              <input value={p ?? ''} onChange={(e)=>update(setPlayersRows, playersRows, i, (e.target.value||'').slice(0,16))} maxLength={16} />
             </div>
           ))}
         </div>
@@ -45,7 +45,7 @@ export default function PlayerList({ playersRows, setPlayersRows, playersCols, s
           {(playersCols || []).map((p,i)=> (
             <div key={i} style={{display:'flex',gap:8,alignItems:'center',marginBottom:6}}>
               <label style={{width:60}}>Col {i+1}</label>
-              <input value={p ?? ''} onChange={(e)=>update(setPlayersCols, playersCols, i, e.target.value)} />
+              <input value={p ?? ''} onChange={(e)=>update(setPlayersCols, playersCols, i, (e.target.value||'').slice(0,16))} maxLength={16} />
             </div>
           ))}
         </div>

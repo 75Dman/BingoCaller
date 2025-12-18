@@ -19,9 +19,33 @@ export default function GridDesigner({ imageUrl, initialGrid, initialDefaults, o
   const [scrambled, setScrambled] = useState(initialGrid?.numbering?.mode === 'manual' || initialDefaults?.scrambled || false)
   const [firstNum, setFirstNum] = useState(initialGrid?.numbering?.first ?? initialDefaults?.firstNum ?? 1)
   const [lastNum, setLastNum] = useState(initialGrid?.numbering?.last ?? (rows*cols))
+  // input buffers to allow the user to clear the field while editing (don't coerce empty -> 0 until blur)
+  const [rowsInput, setRowsInput] = useState(String(initialGrid?.rows ?? initialDefaults?.rows ?? 5))
+  const [colsInput, setColsInput] = useState(String(initialGrid?.cols ?? initialDefaults?.cols ?? 20))
+  const [firstNumInput, setFirstNumInput] = useState(String(initialGrid?.numbering?.first ?? initialDefaults?.firstNum ?? 1))
+
+  useEffect(()=>{ setRowsInput(String(rows)) }, [rows])
+  useEffect(()=>{ setColsInput(String(cols)) }, [cols])
+  useEffect(()=>{ setFirstNumInput(String(firstNum)) }, [firstNum])
   const [values, setValues] = useState(initialGrid?.values || null)
+
+  // Responsive mobile support: allow forcing mobile layout for testing
+  const [forceMobile, setForceMobile] = useState(false)
+  const [isNarrow, setIsNarrow] = useState(typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(max-width:640px)').matches : false)
+  useEffect(()=>{
+    if (typeof window === 'undefined' || !window.matchMedia) return
+    const mq = window.matchMedia('(max-width:640px)')
+    const handler = (e) => setIsNarrow(e.matches)
+    // use addEventListener when available for modern browsers
+    if (mq.addEventListener) mq.addEventListener('change', handler)
+    else mq.addListener(handler)
+    return () => { if (mq.removeEventListener) mq.removeEventListener('change', handler); else mq.removeListener(handler) }
+  }, [])
+
+  const mobileMode = forceMobile || isNarrow
   // overlay/player mode
-  const [overlayType, setOverlayType] = useState(initialGrid?.playerOverlay ? (initialDefaults?.overlayType || 'both') : (initialDefaults?.overlayType || 'dab'))
+  // Default to 'both' so new grids show both dab + player overlays by default
+  const [overlayType, setOverlayType] = useState(initialDefaults?.overlayType || 'both')
   const [playerRows, setPlayerRows] = useState(initialGrid?.playerOverlay?.rows || playersRows || Array.from({length:rows},(_,i)=>`Player ${i+1}`))
   const [playerCols, setPlayerCols] = useState(initialGrid?.playerOverlay?.cols || playersCols || Array.from({length:cols},(_,i)=>`Player ${i+1}`))
   const [rowOffset, setRowOffset] = useState(initialGrid?.playerOverlay?.rowOffset ?? (initialDefaults?.playerRowOffset ?? 110))
@@ -102,6 +126,8 @@ export default function GridDesigner({ imageUrl, initialGrid, initialDefaults, o
   const cornerTol = 14
   const onPointerDown = (e) => {
     if (!containerRef.current) return
+    // prevent default touch gestures (scroll/zoom) while interacting with the designer
+    e.preventDefault()
     const rectC = containerRef.current.getBoundingClientRect()
     const x = e.clientX - rectC.left
     const y = e.clientY - rectC.top
@@ -119,20 +145,26 @@ export default function GridDesigner({ imageUrl, initialGrid, initialDefaults, o
         dragRef.current = { type: 'resize', edges: { left: nearLeft, right: nearRight, top: nearTop, bottom: nearBottom }, startClientX: e.clientX, startClientY: e.clientY, startRect: { ...rect } }
         // store exact references so we can remove the same functions later
         addedListenersRef.current = { move: onPointerMove, up: endDrag }
+        // use pointer events for touch support, keep mouse events as fallback
+        window.addEventListener('pointermove', onPointerMove)
+        window.addEventListener('pointerup', endDrag)
         window.addEventListener('mousemove', onPointerMove)
         window.addEventListener('mouseup', endDrag)
         // dev-only listener tracking
-        import('../utils/listenerTracker').then(m => { m.registerListener('mousemove'); m.registerListener('mouseup') }).catch(()=>{})
+        import('../utils/listenerTracker').then(m => { m.registerListener('pointermove'); m.registerListener('pointerup'); m.registerListener('mousemove'); m.registerListener('mouseup') }).catch(()=>{})
         return
       }
       if (inside) {
         // start moving the whole rect
         dragRef.current = { type: 'move', startClientX: e.clientX, startClientY: e.clientY, startRect: { ...rect } }
         addedListenersRef.current = { move: onPointerMove, up: endDrag }
+        // use pointer events for touch support, keep mouse events as fallback
+        window.addEventListener('pointermove', onPointerMove)
+        window.addEventListener('pointerup', endDrag)
         window.addEventListener('mousemove', onPointerMove)
         window.addEventListener('mouseup', endDrag)
         // dev-only listener tracking
-        import('../utils/listenerTracker').then(m => { m.registerListener('mousemove'); m.registerListener('mouseup') }).catch(()=>{})
+        import('../utils/listenerTracker').then(m => { m.registerListener('pointermove'); m.registerListener('pointerup'); m.registerListener('mousemove'); m.registerListener('mouseup') }).catch(()=>{})
         return
       }
 
@@ -241,23 +273,30 @@ export default function GridDesigner({ imageUrl, initialGrid, initialDefaults, o
     }
     // attach global listeners and remember the exact references so they can be removed
     addedListenersRef.current = { move: onPointerMove, up: endDrag }
+    // use pointer events for touch support, keep mouse events as fallback
+    window.addEventListener('pointermove', onPointerMove)
+    window.addEventListener('pointerup', endDrag)
     window.addEventListener('mousemove', onPointerMove)
     window.addEventListener('mouseup', endDrag)
-    import('../utils/listenerTracker').then(m => { m.registerListener('mousemove'); m.registerListener('mouseup') }).catch(()=>{})
+    import('../utils/listenerTracker').then(m => { m.registerListener('pointermove'); m.registerListener('pointerup'); m.registerListener('mousemove'); m.registerListener('mouseup') }).catch(()=>{})
   }
   const endDrag = () => {
     dragRef.current = null
     if (addedListenersRef.current) {
+      window.removeEventListener('pointermove', addedListenersRef.current.move)
+      window.removeEventListener('pointerup', addedListenersRef.current.up)
       window.removeEventListener('mousemove', addedListenersRef.current.move)
       window.removeEventListener('mouseup', addedListenersRef.current.up)
       // dev-only tracking cleanup
-      import('../utils/listenerTracker').then(m => { m.unregisterListener('mousemove'); m.unregisterListener('mouseup') }).catch(()=>{})
+      import('../utils/listenerTracker').then(m => { m.unregisterListener('pointermove'); m.unregisterListener('pointerup'); m.unregisterListener('mousemove'); m.unregisterListener('mouseup') }).catch(()=>{})
       addedListenersRef.current = null
     } else {
       // fallback: try removing the handlers directly
+      window.removeEventListener('pointermove', onPointerMove)
+      window.removeEventListener('pointerup', endDrag)
       window.removeEventListener('mousemove', onPointerMove)
       window.removeEventListener('mouseup', endDrag)
-      import('../utils/listenerTracker').then(m => { m.unregisterListener('mousemove'); m.unregisterListener('mouseup') }).catch(()=>{})
+      import('../utils/listenerTracker').then(m => { m.unregisterListener('pointermove'); m.unregisterListener('pointerup'); m.unregisterListener('mousemove'); m.unregisterListener('mouseup') }).catch(()=>{})
     }
   }
 
@@ -289,20 +328,27 @@ export default function GridDesigner({ imageUrl, initialGrid, initialDefaults, o
     const onUp = () => {
       labelDragRef.current = null
       if (labelListenersRef.current) {
+        window.removeEventListener('pointermove', labelListenersRef.current.move)
+        window.removeEventListener('pointerup', labelListenersRef.current.up)
         window.removeEventListener('mousemove', labelListenersRef.current.move)
         window.removeEventListener('mouseup', labelListenersRef.current.up)
-        import('../utils/listenerTracker').then(m => { m.unregisterListener('mousemove'); m.unregisterListener('mouseup') }).catch(()=>{})
+        import('../utils/listenerTracker').then(m => { m.unregisterListener('pointermove'); m.unregisterListener('pointerup'); m.unregisterListener('mousemove'); m.unregisterListener('mouseup') }).catch(()=>{})
         labelListenersRef.current = null
       }
     }
     labelListenersRef.current = { move: onMove, up: onUp }
+    // use pointer events for touch support, keep mouse events as fallback
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
     window.addEventListener('mousemove', onMove)
     window.addEventListener('mouseup', onUp)
-    import('../utils/listenerTracker').then(m => { m.registerListener('mousemove'); m.registerListener('mouseup') }).catch(()=>{})
+    import('../utils/listenerTracker').then(m => { m.registerListener('pointermove'); m.registerListener('pointerup'); m.registerListener('mousemove'); m.registerListener('mouseup') }).catch(()=>{})
   }
   useEffect(() => {
     return () => {
       if (labelListenersRef.current) {
+        window.removeEventListener('pointermove', labelListenersRef.current.move)
+        window.removeEventListener('pointerup', labelListenersRef.current.up)
         window.removeEventListener('mousemove', labelListenersRef.current.move)
         window.removeEventListener('mouseup', labelListenersRef.current.up)
         labelListenersRef.current = null
@@ -420,21 +466,29 @@ export default function GridDesigner({ imageUrl, initialGrid, initialDefaults, o
     onSave(grid)
   }
 
+  // Styles and layout helpers for mobile/desktop modes
+  const overlayStyle = {position:'fixed',left:0,top:0,right:0,bottom:0,background:'rgba(0,0,0,0.4)',zIndex:9999,display:'flex',alignItems: mobileMode ? 'stretch' : 'center',justifyContent: mobileMode ? 'stretch' : 'center'}
+  const modalStyle = mobileMode ? {width:'100vw', height:'100vh', maxWidth:'100%', minWidth:0, minHeight:0, overflow:'auto', borderRadius:0} : {width:'85vw',height:'85vh',maxWidth:1200,minWidth:520,minHeight:360,overflow:'auto'}
+  const contentStyle = mobileMode ? {marginTop:8,display:'flex',gap:12,alignItems:'stretch',flexDirection:'column'} : {marginTop:8,display:'flex',gap:12,alignItems:'stretch',height:'calc(100% - 60px)'}
+  const imageContainerStyle = mobileMode ? {flex:'0 0 auto', width:'100%', height:'100vh', display:'flex'} : {flex:'1 1 auto',minWidth:240,maxWidth:'100%',display:'flex',height:'100%'}
+  const controlsWidth = mobileMode ? '100%' : 340
+
   return (
-    <div style={{position:'fixed',left:0,top:0,right:0,bottom:0,background:'rgba(0,0,0,0.4)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center'}}>
-      <div className="card-view grid-designer-modal" style={{width:'85vw',height:'85vh',maxWidth:1200,minWidth:520,minHeight:360,overflow:'auto'}}>
+    <div style={overlayStyle}>
+      <div className="card-view grid-designer-modal" style={modalStyle}>
         <div className="grid-designer-header" style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
           <h3 style={{margin:0}}>Design Dab Grid</h3>
           <div>
             <div style={{fontSize:12,color:'#cbd5e1',marginBottom:6,textAlign:'right'}}>Drag lower-right corner to resize</div>
+            <button className="btn-muted" onClick={()=>setForceMobile(f=>!f)} style={{marginRight:8}}>{forceMobile ? 'Mobile (forced)' : 'Force mobile'}</button>
             <button className="btn-muted" onClick={onCancel} style={{marginRight:8}}>Cancel</button>
             <button className="btn-primary" onClick={handleSave} disabled={!rect || !values}>Save Grid</button>
           </div>
         </div>
 
-        <div style={{marginTop:8,display:'flex',gap:12,alignItems:'stretch',height:'calc(100% - 60px)'}}>
-          <div style={{flex:'1 1 auto',minWidth:240,maxWidth:'100%',display:'flex',height:'100%'}}>
-            <div className="grid-designer-image-container" ref={containerRef} onMouseDown={onPointerDown} onMouseMove={onPointerMove} onMouseUp={finishDraw} onMouseLeave={finishDraw} style={{height:'100%'}}>
+        <div style={contentStyle}>
+          <div style={imageContainerStyle}>
+            <div className="grid-designer-image-container" ref={containerRef} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={finishDraw} onPointerLeave={finishDraw} style={{height:'100%'}}>
               <img ref={imgRef} src={imageUrl} alt="Design" style={{display:'block',maxWidth:'100%',maxHeight:'100%',objectFit:'contain'}} />
               {/* instructions for drawing */}
               <div style={{position:'absolute',left:8,top:8,background:'rgba(255,255,255,0.95)',padding:'6px 8px',borderRadius:4,fontSize:12,color:'#111'}}>
@@ -474,7 +528,7 @@ export default function GridDesigner({ imageUrl, initialGrid, initialDefaults, o
                     if (i === 0 || i === rowPos.length-1) return null
                     const top = p
                     return (
-                      <div key={'r'+i} onMouseDown={(e)=>startDrag('row', i, e)} className="designer-divider horizontal" style={{position:'absolute',left:0,top:top-2,width:'100%',height:4,background:'rgba(0,0,0,0.5)',cursor:'ns-resize',pointerEvents:'auto',opacity:0.9}} />
+                      <div key={'r'+i} onPointerDown={(e)=>startDrag('row', i, e)} className="designer-divider horizontal" style={{position:'absolute',left:0,top:top-2,width:'100%',height:4,background:'rgba(0,0,0,0.5)',cursor:'ns-resize',pointerEvents:'auto',opacity:0.9}} />
                     )
                   })}
 
@@ -483,7 +537,7 @@ export default function GridDesigner({ imageUrl, initialGrid, initialDefaults, o
                     if (i === 0 || i === colPos.length-1) return null
                     const left = p
                     return (
-                      <div key={'c'+i} onMouseDown={(e)=>startDrag('col', i, e)} className="designer-divider vertical" style={{position:'absolute',left:left-2,top:0,height:'100%',width:4,background:'rgba(0,0,0,0.5)',cursor:'ew-resize',pointerEvents:'auto',opacity:0.9}} />
+                      <div key={'c'+i} onPointerDown={(e)=>startDrag('col', i, e)} className="designer-divider vertical" style={{position:'absolute',left:left-2,top:0,height:'100%',width:4,background:'rgba(0,0,0,0.5)',cursor:'ew-resize',pointerEvents:'auto',opacity:0.9}} />
                     )
                   })}
                   {/* preview player labels when enabled */}
@@ -502,7 +556,7 @@ export default function GridDesigner({ imageUrl, initialGrid, initialDefaults, o
                         const topPos = safeNumber(centerY - labelH / 2, 0)
                         const leftPos = -rowOffsetPx
                         return (
-                          <div key={'prow'+r} className="player-label row" onMouseDown={(e)=>startLabelDrag('row', e)} style={{position:'absolute',left:leftPos,top:topPos,width:labelW,height:labelH,display:'flex',alignItems:'center',padding:'4px 6px',background:'transparent',color:'#012',cursor:'grab',borderRadius:4,fontSize:fontSize}}>{name}</div>
+                          <div key={'prow'+r} className="player-label row" onPointerDown={(e)=>startLabelDrag('row', e)} style={{position:'absolute',left:leftPos,top:topPos,width:labelW,height:labelH,display:'flex',alignItems:'center',padding:'4px 6px',background:'transparent',color:'#012',cursor:'grab',borderRadius:4,fontSize:fontSize,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{name}</div>
                         )
                       })}
 
@@ -510,14 +564,14 @@ export default function GridDesigner({ imageUrl, initialGrid, initialDefaults, o
                       {showPlayerCols && playerCols.slice(0, cols).map((name, c) => {
                         const centerX = (colPos[c] + colPos[c+1]) / 2
                         const colW = Math.max(1, colPos[c+1] - colPos[c])
-                        const colOffsetPx = colOffset
-                        const labelW = Math.max(16, Math.min(40, Math.round(colW * 0.8)))
+                        const colOffsetPx = Math.max(20, colOffset)
                         const labelH = Math.max(60, Math.min(140, Math.round(colOffsetPx - 8)))
                         const fontSize = Math.max(10, Math.min(16, Math.round(colW * 0.4)))
-                        const leftPos = centerX - labelW / 2
-                        const topPos = -colOffsetPx - labelH + 8
+                        // center the label over the column and use translate/rotate so dimensions don't offset placement
+                        const leftPos = centerX
+                        const topPos = -colOffsetPx
                         return (
-                          <div key={'pcol'+c} className="player-label col" onMouseDown={(e)=>startLabelDrag('col', e)} style={{position:'absolute',left:leftPos,top:topPos,width:labelW,height:labelH,display:'flex',alignItems:'center',justifyContent:'center',padding:'4px 6px',background:'transparent',color:'#012',cursor:'grab',borderRadius:4,transform:'rotate(-90deg)',transformOrigin:'center bottom',fontSize:fontSize}}>{name}</div>
+                          <div key={'pcol'+c} className="player-label col" onPointerDown={(e)=>startLabelDrag('col', e)} style={{position:'absolute',left:leftPos,top:topPos,width:labelH,height:Math.max(16,Math.round(colW * 0.8)),display:'flex',alignItems:'center',justifyContent:'center',padding:'4px 6px',background:'transparent',color:'#012',cursor:'grab',borderRadius:4,transform:'translate(-50%,-100%) rotate(-90deg)',transformOrigin:'center center',fontSize:fontSize,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{name}</div>
                         )
                       })}
                     </>
@@ -528,15 +582,15 @@ export default function GridDesigner({ imageUrl, initialGrid, initialDefaults, o
             </div>
           </div>
 
-          <div style={{width:340}} className="grid-designer-controls">
+          <div style={{width:controlsWidth}} className="grid-designer-controls">
             <div className="grid-designer-controls-panel">
               <div style={{fontSize:13,fontWeight:700,marginBottom:6}}>Grid Size</div>
               <div style={{display:'flex',gap:8,alignItems:'center',marginBottom:8}}>
                 <label style={{fontSize:13}}>Rows
-                  <input type="number" value={rows} min={1} max={50} onChange={(e)=>setRows(Number(e.target.value))} style={{width:70,marginLeft:8}} />
+                  <input type="number" value={rowsInput} min={1} max={50} onChange={(e)=>{ setRowsInput(e.target.value); if (e.target.value !== '') { const v = Number(e.target.value); if (Number.isFinite(v)) setRows(v) } }} onBlur={(e)=>{ if (e.target.value === '') { setRows(0); setRowsInput('0') } else { const v = Number(e.target.value); if (Number.isFinite(v)) setRows(v) } }} style={{width:70,marginLeft:8}} />
                 </label>
                 <label style={{fontSize:13}}>Columns
-                  <input type="number" value={cols} min={1} max={100} onChange={(e)=>setCols(Number(e.target.value))} style={{width:80,marginLeft:8}} />
+                  <input type="number" value={colsInput} min={1} max={100} onChange={(e)=>{ setColsInput(e.target.value); if (e.target.value !== '') { const v = Number(e.target.value); if (Number.isFinite(v)) setCols(v) } }} onBlur={(e)=>{ if (e.target.value === '') { setCols(0); setColsInput('0') } else { const v = Number(e.target.value); if (Number.isFinite(v)) setCols(v) } }} style={{width:80,marginLeft:8}} />
                 </label>
               </div>
 
@@ -568,7 +622,7 @@ export default function GridDesigner({ imageUrl, initialGrid, initialDefaults, o
               {!scrambled && (
                 <div style={{marginBottom:8}}>
                   <label style={{display:'block'}}>First number (default start)
-                    <input type="number" value={firstNum} onChange={(e)=>setFirstNum(Number(e.target.value))} style={{width:100,marginLeft:8}} />
+                    <input type="number" value={firstNumInput} onChange={(e)=>{ setFirstNumInput(e.target.value); if (e.target.value !== '') { const v = Number(e.target.value); if (Number.isFinite(v)) setFirstNum(v) } }} onBlur={(e)=>{ if (e.target.value === '') { setFirstNum(0); setFirstNumInput('0') } else { const v = Number(e.target.value); if (Number.isFinite(v)) setFirstNum(v) } }} style={{width:100,marginLeft:8}} />
                   </label>
                 </div>
               )}
@@ -626,21 +680,21 @@ export default function GridDesigner({ imageUrl, initialGrid, initialDefaults, o
                     <div style={{fontSize:12,fontWeight:600,marginBottom:6}}>Player names for rows</div>
                     {playerRows.map((name, i) => (
                       <input key={i} value={name} onChange={(e)=>{
-                        const val = e.target.value
+                        const val = (e.target.value || '').slice(0,16)
                         // update local preview
                         setPlayerRows(prev=>{ const next = prev.slice(); next[i] = val; return next })
                         // update global players immediately so other UIs stay in sync
                         if (setPlayersRows) setPlayersRows(prev => { const next = (prev || []).slice(); next[i] = val; return next })
-                      }} style={{width:'100%',marginBottom:6}} />
+                      }} style={{width:'100%',marginBottom:6}} maxLength={16} />
                     ))}
 
                     <div style={{fontSize:12,fontWeight:600,marginTop:8,marginBottom:6}}>Player names for columns</div>
                     {playerCols.map((name, i) => (
                       <input key={i} value={name} onChange={(e)=>{
-                        const val = e.target.value
+                        const val = (e.target.value || '').slice(0,16)
                         setPlayerCols(prev=>{ const next = prev.slice(); next[i] = val; return next })
                         if (setPlayersCols) setPlayersCols(prev => { const next = (prev || []).slice(); next[i] = val; return next })
-                      }} style={{width:'100%',marginBottom:6}} />
+                      }} style={{width:'100%',marginBottom:6}} maxLength={16} />
                     ))}
 
                     <div style={{display:'flex',gap:8,marginTop:6}}>

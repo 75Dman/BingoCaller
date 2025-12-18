@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkbingo_caller_pro=self.webpackChunkbingo_caller_pro||[]).push([[234],{996(e,n,r){r.d(n,{registerListener:()=>i,unregisterListener:()=>s});r(555);function i(e){}function s(e){}}}]);
+//# sourceMappingURL=234.acf6dd45.chunk.js.map

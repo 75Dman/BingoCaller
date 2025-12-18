@@ -123,9 +123,12 @@ export default function CardView({ card, playersRows, setPlayersRows, playersCol
     e.stopPropagation(); e.preventDefault()
     setResizing(true)
     resizeRef.current = { startX: e.clientX, startY: e.clientY, startW: imageContainerRef.current?.clientWidth || 0, startH: imageContainerRef.current?.clientHeight || 0 }
+    // support pointer events for touch, keep mouse fallback
+    window.addEventListener('pointermove', doResize)
+    window.addEventListener('pointerup', endResize)
     window.addEventListener('mousemove', doResize)
     window.addEventListener('mouseup', endResize)
-    import('../utils/listenerTracker').then(m => { m.registerListener('mousemove'); m.registerListener('mouseup') }).catch(()=>{})
+    import('../utils/listenerTracker').then(m => { m.registerListener('pointermove'); m.registerListener('pointerup'); m.registerListener('mousemove'); m.registerListener('mouseup') }).catch(()=>{})
   }
   const doResize = (ev) => {
     if (!resizeRef.current || !imageContainerRef.current) return
@@ -143,9 +146,11 @@ export default function CardView({ card, playersRows, setPlayersRows, playersCol
   const endResize = () => {
     setResizing(false)
     resizeRef.current = null
+    window.removeEventListener('pointermove', doResize)
+    window.removeEventListener('pointerup', endResize)
     window.removeEventListener('mousemove', doResize)
     window.removeEventListener('mouseup', endResize)
-    import('../utils/listenerTracker').then(m => { m.unregisterListener('mousemove'); m.unregisterListener('mouseup') }).catch(()=>{})
+    import('../utils/listenerTracker').then(m => { m.unregisterListener('pointermove'); m.unregisterListener('pointerup'); m.unregisterListener('mousemove'); m.unregisterListener('mouseup') }).catch(()=>{})
     // persist final size
     if (imageContainerRef.current) {
       setSavedSize({ width: imageContainerRef.current.clientWidth, height: imageContainerRef.current.clientHeight })
@@ -238,7 +243,7 @@ export default function CardView({ card, playersRows, setPlayersRows, playersCol
             const fontSize = Math.max(10, Math.min(18, Math.round(cellH * 0.45)))
             const topPos = safeNumber(centerY - labelH / 2, 0)
             return (
-              <div key={'prow'+r} className="player-label row" onClick={(e)=>{ e.stopPropagation(); onToggleDabLine && onToggleDabLine('row', r) }} style={{position:'absolute',left:leftPos,top:topPos,width:labelW,height:labelH,display:'flex',alignItems:'center',padding:'4px 6px',background:'transparent',color:'#012',cursor:'pointer',borderRadius:4,fontSize:fontSize}}>{name}</div>
+              <div key={'prow'+r} className="player-label row" onClick={(e)=>{ e.stopPropagation(); onToggleDabLine && onToggleDabLine('row', r) }} style={{position:'absolute',left:leftPos,top:topPos,width:labelW,height:labelH,display:'flex',alignItems:'center',padding:'4px 6px',background:'transparent',color:'#012',cursor:'pointer',borderRadius:4,fontSize:fontSize,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{name}</div>
             )
           }))}
 
@@ -253,12 +258,12 @@ export default function CardView({ card, playersRows, setPlayersRows, playersCol
             const labelW = Math.max(20, Math.min(40, Math.round(cellW * 0.8)))
             const labelH = Math.max(60, Math.min(140, safeNumber(Math.round(colOffsetPx - 8), 60)))
             const fontSize = Math.max(10, Math.min(16, Math.round(cellW * 0.4)))
-            // position relative to overlay container
-            // anchor rotated label by its bottom center so it sits just above the overlay by colOffsetPx
-            const topPos = safeNumber(-colOffsetPx - labelH + 8, -colOffsetPx)
-            const leftPos = safeNumber(centerX - labelW / 2, 0)
+            // position relative to overlay container: center label over column
+            const leftPos = centerX
+            const topPos = -colOffsetPx
+            // place and rotate using translate so width/height don't shift placement after rotation
             return (
-              <div key={'pcol'+c} className="player-label col" onClick={(e)=>{ e.stopPropagation(); onToggleDabLine && onToggleDabLine('col', c) }} style={{position:'absolute',left:leftPos,top:topPos,width:labelW,height:labelH,display:'flex',alignItems:'center',justifyContent:'center',padding:'4px 6px',background:'transparent',color:'#012',cursor:'pointer',borderRadius:4,transform:'rotate(-90deg)',transformOrigin:'center bottom',fontSize:fontSize}}>{name}</div>
+              <div key={'pcol'+c} className="player-label col" onClick={(e)=>{ e.stopPropagation(); onToggleDabLine && onToggleDabLine('col', c) }} style={{position:'absolute',left:leftPos,top:topPos,width:labelH,height:Math.max(16,Math.round(cellW * 0.8)),display:'flex',alignItems:'center',justifyContent:'center',padding:'4px 6px',background:'transparent',color:'#012',cursor:'pointer',borderRadius:4,transform:'translate(-50%,-100%) rotate(-90deg)',transformOrigin:'center center',fontSize:fontSize}}>{name}</div>
             )
           }))}
 
@@ -325,10 +330,10 @@ export default function CardView({ card, playersRows, setPlayersRows, playersCol
                 const handleSize = 14
                 const left = Math.round((imgRef.current.getBoundingClientRect().right - containerRect.left) - handleSize - 4)
                 const top = Math.round((imgRef.current.getBoundingClientRect().bottom - containerRect.top) - handleSize - 4)
-                return <div onMouseDown={startResize} style={{position:'absolute',left:left,top:top,width:handleSize,height:handleSize,background:'rgba(0,0,0,0.2)',border:'1px solid rgba(255,255,255,0.6)',cursor:'nwse-resize',borderRadius:2}} title="Drag to resize" />
+                return <div onPointerDown={startResize} style={{position:'absolute',left:left,top:top,width:handleSize,height:handleSize,background:'rgba(0,0,0,0.2)',border:'1px solid rgba(255,255,255,0.6)',cursor:'nwse-resize',borderRadius:2}} title="Drag to resize" />
               })()
             ) : (
-              <div onMouseDown={startResize} style={{position:'absolute',right:2,bottom:2,width:14,height:14,background:'rgba(0,0,0,0.2)',border:'1px solid rgba(255,255,255,0.6)',cursor:'nwse-resize',borderRadius:2}} title="Drag to resize" />
+              <div onPointerDown={startResize} style={{position:'absolute',right:2,bottom:2,width:14,height:14,background:'rgba(0,0,0,0.2)',border:'1px solid rgba(255,255,255,0.6)',cursor:'nwse-resize',borderRadius:2}} title="Drag to resize" />
             ))}
           </div>
         </div>

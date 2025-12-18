@@ -2,7 +2,7 @@
   src/components/DabOverlayControls.js
   Small control panel placed above Players to open the Grid Designer
 */
-import React from 'react'
+import React, { useState, useEffect } from 'react' 
 
 export default function DabOverlayControls({ grid, defaults, setDefaults, onDesign, onClear, playersRows, setPlayersRows, playersCols, setPlayersCols }){
   // helper to resize a players array preserving existing names and filling defaults
@@ -11,6 +11,17 @@ export default function DabOverlayControls({ grid, defaults, setDefaults, onDesi
     while (next.length < size) next.push(`Player ${next.length+1}`)
     return next
   }
+
+  // buffered input state so users can clear an input while typing (avoids it snapping to 0)
+  const [rowsInput, setRowsInput] = useState(String(defaults.rows ?? ''))
+  const [colsInput, setColsInput] = useState(String(defaults.cols ?? ''))
+  const [firstNumInput, setFirstNumInput] = useState(String(defaults.firstNum ?? 1))
+
+  useEffect(()=>{
+    setRowsInput(String(defaults.rows ?? ''))
+    setColsInput(String(defaults.cols ?? ''))
+    setFirstNumInput(String(defaults.firstNum ?? 1))
+  }, [defaults.rows, defaults.cols, defaults.firstNum])
 
   return (
     <div className="controls dab-overlay-card" style={{marginBottom:12, padding:12}}>
@@ -30,23 +41,39 @@ export default function DabOverlayControls({ grid, defaults, setDefaults, onDesi
         <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
           <label style={{fontSize:12,display:'flex',alignItems:'center',gap:6}}>
             <span>Rows</span>
-            <input type="number" value={defaults.rows} min={1} max={50} onChange={(e)=>{
-              const n = Number(e.target.value)
-              setDefaults(d=>({ ...d, rows: n }))
-              if (setPlayersRows) setPlayersRows(prev => resizePlayers(prev, n))
-            }} style={{width:60,background:'transparent',color:'#fff',border:'1px solid rgba(255,255,255,0.06)',padding:4,borderRadius:4}} />
+            <input type="number" value={rowsInput} min={1} max={50} onChange={(e)=>{
+              setRowsInput(e.target.value)
+              if (e.target.value !== '') {
+                const n = Number(e.target.value)
+                if (Number.isFinite(n)) {
+                  setDefaults(d=>({ ...d, rows: n }))
+                  if (setPlayersRows) setPlayersRows(prev => resizePlayers(prev, n))
+                }
+              }
+            }} onBlur={(e)=>{ if (e.target.value === '') setRowsInput(String(defaults.rows ?? 1)) }} style={{width:60,background:'transparent',color:'#fff',border:'1px solid rgba(255,255,255,0.06)',padding:4,borderRadius:4}} />
           </label>
           <label style={{fontSize:12,display:'flex',alignItems:'center',gap:6}}>
             <span>Cols</span>
-            <input type="number" value={defaults.cols} min={1} max={100} onChange={(e)=>{
-              const n = Number(e.target.value)
-              setDefaults(d=>({ ...d, cols: n }))
-              if (setPlayersCols) setPlayersCols(prev => resizePlayers(prev, n))
-            }} style={{width:80,background:'transparent',color:'#fff',border:'1px solid rgba(255,255,255,0.06)',padding:4,borderRadius:4}} />
+            <input type="number" value={colsInput} min={1} max={100} onChange={(e)=>{
+              setColsInput(e.target.value)
+              if (e.target.value !== '') {
+                const n = Number(e.target.value)
+                if (Number.isFinite(n)) {
+                  setDefaults(d=>({ ...d, cols: n }))
+                  if (setPlayersCols) setPlayersCols(prev => resizePlayers(prev, n))
+                }
+              }
+            }} onBlur={(e)=>{ if (e.target.value === '') setColsInput(String(defaults.cols ?? 1)) }} style={{width:80,background:'transparent',color:'#fff',border:'1px solid rgba(255,255,255,0.06)',padding:4,borderRadius:4}} />
           </label>
           <label style={{fontSize:12,display:'flex',alignItems:'center',gap:6}}>
             <span>Start</span>
-            <input type="number" value={defaults.firstNum ?? 1} min={0} max={999} onChange={(e)=>setDefaults(d=>({ ...d, firstNum: Number(e.target.value) }))} style={{width:80,background:'transparent',color:'#fff',border:'1px solid rgba(255,255,255,0.06)',padding:4,borderRadius:4}} />
+            <input type="number" value={firstNumInput} min={0} max={999} onChange={(e)=>{
+              setFirstNumInput(e.target.value)
+              if (e.target.value !== '') {
+                const v = Number(e.target.value)
+                if (Number.isFinite(v)) setDefaults(d=>({ ...d, firstNum: v }))
+              }
+            }} onBlur={(e)=>{ if (e.target.value === '') { setFirstNumInput(String(defaults.firstNum ?? 1)); setDefaults(d=>({ ...d, firstNum: defaults.firstNum ?? 1 })) } }} style={{width:80,background:'transparent',color:'#fff',border:'1px solid rgba(255,255,255,0.06)',padding:4,borderRadius:4}} />
           </label>
           <label style={{fontSize:12}}>
             Numbering

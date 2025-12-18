@@ -39,7 +39,7 @@ export default function App() {
   const [playersRows, setPlayersRows] = useLocalStorage('bingo_players_rows', [])
   const [playersCols, setPlayersCols] = useLocalStorage('bingo_players_cols', [])
   // defaults to control whether row/col player labels are shown by default
-  const [gridDefaults, setGridDefaults] = useLocalStorage('bingo_grid_defaults', { rows: 20, cols: 5, order: 'column', scrambled: false, firstNum: 1, overlayType: 'dab', playerCount: 20, playerRowOffset: 110, playerColOffset: 36, showPlayerRows: true, showPlayerCols: false })
+  const [gridDefaults, setGridDefaults] = useLocalStorage('bingo_grid_defaults', { rows: 20, cols: 5, order: 'column', scrambled: false, firstNum: 1, overlayType: 'both', playerCount: 20, playerRowOffset: 110, playerColOffset: 36, showPlayerRows: true, showPlayerCols: false })
   const [dabbed, setDabbed] = useLocalStorage(LS_KEYS.DABBED, null)
   const [called, setCalled] = useLocalStorage(LS_KEYS.CALLED, [])
   const [settings, setSettings] = useLocalStorage(LS_KEYS.SETTINGS, { maxBall: 75, autoMode: true, soundEnabled: true })
@@ -181,8 +181,8 @@ export default function App() {
       }
       // update global player lists based on what the designer saved (if present)
       if (g.playerOverlay) {
-        if (g.playerOverlay.showRows) setPlayersRows(g.playerOverlay.rows.slice(0, g.rows))
-        if (g.playerOverlay.showCols) setPlayersCols(g.playerOverlay.cols.slice(0, g.cols))
+        if (g.playerOverlay.showRows) setPlayersRows(g.playerOverlay.rows.slice(0, g.rows).map(n=> (n||'').slice(0,16)))
+        if (g.playerOverlay.showCols) setPlayersCols(g.playerOverlay.cols.slice(0, g.cols).map(n=> (n||'').slice(0,16)))
       }
     }
     // If overlay doesn't include dab, also ensure any previous winner state is cleared

@@ -26,6 +26,10 @@
 - `dabbed`, `onToggleDab(r,c)` — dab state and manual toggle handler
 - `manualMode` — when true enables manual dab clicks
 - `grid` — optional saved grid object with `bbox`, `values`, `playerOverlay` and offsets
+
+
+### Player label behavior change
+- Clicking a player label now **highlights** the label (visual selection) instead of automatically toggling (dabbing) the entire row/column. This prevents accidental Bingos when previewing or checking players. To toggle dabbing for an entire row/column use the dedicated controls in the grid designer or the row/column dab controls in the developer/testing UI.
 - `imageUrl` — `data:` URL or resolved `indexeddb:` marker
 
 ---
