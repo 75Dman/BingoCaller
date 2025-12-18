@@ -292,8 +292,8 @@ export default function CardView({ card, playersRows, setPlayersRows, playersCol
             {headerTitle}
           </h3>
           <div style={{display:'flex',alignItems:'center',gap:8}}>
-            <div style={{fontSize:12,color:'#cbd5e1'}}>Click numbers in the grid below to dab (manual)</div>
-            <label style={{display:'flex',alignItems:'center',gap:8,color:'#cbd5e1'}}><input type="checkbox" checked={showEditableGrid} onChange={(e)=>setShowEditableGrid(e.target.checked)} /> Show editable grid</label>
+            {resizable && <div style={{fontSize:12,color:'#cbd5e1'}}>Click numbers in the grid below to dab (manual)</div>}
+            {resizable && <label style={{display:'flex',alignItems:'center',gap:8,color:'#cbd5e1'}}><input type="checkbox" checked={showEditableGrid} onChange={(e)=>setShowEditableGrid(e.target.checked)} /> Show editable grid</label>}
             {resizable && <button className="btn-muted" onClick={resetContainerSize} title="Reset preview size">Reset size</button>}
           </div>
         </div>

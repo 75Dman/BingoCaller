@@ -12,7 +12,7 @@
 
 ## Key features & behavior
 - **Resizable preview & persistence:** Users can resize the image preview using a pinned drag handle; the chosen size persists in `localStorage` under `bingo_cardview_size`. A **Reset size** button restores automatic sizing.
-- **Editable grid toggle (persisted):** A **Show editable grid** checkbox toggles rendering of the editable grid below the image; its state is persisted in `localStorage` under `bingo_show_editable_grid` so users keep their preference across sessions.
+- **Editable grid toggle (persisted):** A **Show editable grid** checkbox toggles rendering of the editable grid below the image; its state is persisted in `localStorage` under `bingo_show_editable_grid` so users keep their preference across sessions. Note: when the component is rendered in fullscreen mode (e.g., inside `BingoCardView`) `resizable` is set to `false` and the instruction text and this toggle are hidden to provide an uncluttered fullscreen experience.
 - **Average-color background blending:** When possible CardView samples the image (small downscaled canvas) and uses the average color to subtly blend the preview's background, improving contrast and legibility when the image is smaller than its container.
 - **Accurate overlay math:** CardView uses `imgRef` and `imageContainerRef` and prefers `img.getBoundingClientRect()` to compute precise overlay positions so saved `bbox` values remain correct across CSS scaling and letterboxing.
 - **Resize/Scroll robustness:** The component uses `ResizeObserver` (when available) and scroll capture listeners to recompute overlay positions on window resize and scroll. When mounted inside `BingoCardView` it dispatches a short mount-time tick to ensure overlays align immediately on entering fullscreen.
