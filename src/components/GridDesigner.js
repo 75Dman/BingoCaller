@@ -126,11 +126,12 @@ export default function GridDesigner({ imageUrl, initialGrid, initialDefaults, o
   const cornerTol = 14
   const onPointerDown = (e) => {
     if (!containerRef.current) return
-    // prevent default touch gestures (scroll/zoom) while interacting with the designer
-    e.preventDefault()
     const rectC = containerRef.current.getBoundingClientRect()
     const x = e.clientX - rectC.left
     const y = e.clientY - rectC.top
+    // Robust touch detection: prefer explicit pointerType, but also fall back to capability checks
+    const isTouchCapable = (typeof window !== 'undefined') && (('ontouchstart' in window) || (navigator && navigator.maxTouchPoints && navigator.maxTouchPoints > 0))
+    const pointerType = (e && e.pointerType === 'touch') || (e && e.pointerType === '') && isTouchCapable ? 'touch' : ((e && e.pointerType) || (e && e.type && String(e.type).toLowerCase().includes('touch')) ? 'touch' : 'mouse')
 
     // If rect exists, check for edge/corner proximity for resize/move
     if (rect) {
@@ -141,7 +142,8 @@ export default function GridDesigner({ imageUrl, initialGrid, initialDefaults, o
       const nearBottom = Math.abs(y - ry1) <= cornerTol
       const inside = x >= rx0 && x <= rx1 && y >= ry0 && y <= ry1
       if (nearLeft || nearRight || nearTop || nearBottom) {
-        // start resizing from the corner/edge
+        // start resizing from the corner/edge (prevent scroll while resizing)
+        e.preventDefault()
         dragRef.current = { type: 'resize', edges: { left: nearLeft, right: nearRight, top: nearTop, bottom: nearBottom }, startClientX: e.clientX, startClientY: e.clientY, startRect: { ...rect } }
         // store exact references so we can remove the same functions later
         addedListenersRef.current = { move: onPointerMove, up: endDrag }
@@ -155,7 +157,8 @@ export default function GridDesigner({ imageUrl, initialGrid, initialDefaults, o
         return
       }
       if (inside) {
-        // start moving the whole rect
+        // start moving the whole rect (prevent scroll while moving)
+        e.preventDefault()
         dragRef.current = { type: 'move', startClientX: e.clientX, startClientY: e.clientY, startRect: { ...rect } }
         addedListenersRef.current = { move: onPointerMove, up: endDrag }
         // use pointer events for touch support, keep mouse events as fallback
@@ -168,15 +171,19 @@ export default function GridDesigner({ imageUrl, initialGrid, initialDefaults, o
         return
       }
 
-      // Clicked outside rect: allow starting a new draw anchored at the opposite corner
-      const anchorX = x < rx0 ? rx1 : (x > rx1 ? rx0 : (Math.abs(x - rx0) > Math.abs(x - rx1) ? rx0 : rx1))
-      const anchorY = y < ry0 ? ry1 : (y > ry1 ? ry0 : (Math.abs(y - ry0) > Math.abs(y - ry1) ? ry0 : ry1))
-      setStartPt({ x: anchorX, y: anchorY })
-      setDrawing(true)
+      // Clicked outside rect: only start a new draw for non-touch pointers. For touch, let the gesture scroll.
+      if (pointerType !== 'touch') {
+        const anchorX = x < rx0 ? rx1 : (x > rx1 ? rx0 : (Math.abs(x - rx0) > Math.abs(x - rx1) ? rx0 : rx1))
+        const anchorY = y < ry0 ? ry1 : (y > ry1 ? ry0 : (Math.abs(y - ry0) > Math.abs(y - ry1) ? ry0 : ry1))
+        e.preventDefault()
+        setStartPt({ x: anchorX, y: anchorY })
+        setDrawing(true)
+      }
       return
     }
 
-    // otherwise start a new draw
+    // otherwise start a new draw (when no rect exists we allow touch to begin drawing)
+    if (pointerType !== 'touch') e.preventDefault()
     setStartPt({x,y})
     setDrawing(true)
   }
@@ -470,7 +477,8 @@ export default function GridDesigner({ imageUrl, initialGrid, initialDefaults, o
   const overlayStyle = {position:'fixed',left:0,top:0,right:0,bottom:0,background:'rgba(0,0,0,0.4)',zIndex:9999,display:'flex',alignItems: mobileMode ? 'stretch' : 'center',justifyContent: mobileMode ? 'stretch' : 'center'}
   const modalStyle = mobileMode ? {width:'100vw', height:'100vh', maxWidth:'100%', minWidth:0, minHeight:0, overflow:'auto', borderRadius:0} : {width:'85vw',height:'85vh',maxWidth:1200,minWidth:520,minHeight:360,overflow:'auto'}
   const contentStyle = mobileMode ? {marginTop:8,display:'flex',gap:12,alignItems:'stretch',flexDirection:'column'} : {marginTop:8,display:'flex',gap:12,alignItems:'stretch',height:'calc(100% - 60px)'}
-  const imageContainerStyle = mobileMode ? {flex:'0 0 auto', width:'100%', height:'100vh', display:'flex'} : {flex:'1 1 auto',minWidth:240,maxWidth:'100%',display:'flex',height:'100%'}
+  // when in mobile mode, leave a small right gutter so users can touch outside the image to scroll
+  const imageContainerStyle = mobileMode ? {flex:'0 0 auto', width:'calc(100% - 20px)', height:'100vh', display:'flex', marginRight:20} : {flex:'1 1 auto',minWidth:240,maxWidth:'100%',display:'flex',height:'100%'}
   const controlsWidth = mobileMode ? '100%' : 340
 
   return (
