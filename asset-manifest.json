@@ -1,19 +1,19 @@
 {
   "files": {
     "main.css": "/BingoCaller/static/css/main.fa408022.css",
-    "main.js": "/BingoCaller/static/js/main.f8b36107.js",
+    "main.js": "/BingoCaller/static/js/main.1dea229f.js",
     "static/js/199.67d0641b.chunk.js": "/BingoCaller/static/js/199.67d0641b.chunk.js",
     "static/js/234.acf6dd45.chunk.js": "/BingoCaller/static/js/234.acf6dd45.chunk.js",
     "static/media/ballsincage.wav": "/BingoCaller/static/media/ballsincage.c45fefd85cbe8592641b.wav",
     "static/media/Bingo Tusch.mp3": "/BingoCaller/static/media/Bingo Tusch.04e5d1459d8b2632c6a0.mp3",
     "index.html": "/BingoCaller/index.html",
     "main.fa408022.css.map": "/BingoCaller/static/css/main.fa408022.css.map",
-    "main.f8b36107.js.map": "/BingoCaller/static/js/main.f8b36107.js.map",
+    "main.1dea229f.js.map": "/BingoCaller/static/js/main.1dea229f.js.map",
     "199.67d0641b.chunk.js.map": "/BingoCaller/static/js/199.67d0641b.chunk.js.map",
     "234.acf6dd45.chunk.js.map": "/BingoCaller/static/js/234.acf6dd45.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.fa408022.css",
-    "static/js/main.f8b36107.js"
+    "static/js/main.1dea229f.js"
   ]
 }
