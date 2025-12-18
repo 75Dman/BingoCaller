@@ -12,10 +12,12 @@
 
 ## Key features & behavior
 - **Resizable preview & persistence:** Users can resize the image preview using a pinned drag handle; the chosen size persists in `localStorage` under `bingo_cardview_size`. A **Reset size** button restores automatic sizing.
+- **Editable grid toggle (persisted):** A **Show editable grid** checkbox toggles rendering of the editable grid below the image; its state is persisted in `localStorage` under `bingo_show_editable_grid` so users keep their preference across sessions.
+- **Average-color background blending:** When possible CardView samples the image (small downscaled canvas) and uses the average color to subtly blend the preview's background, improving contrast and legibility when the image is smaller than its container.
 - **Accurate overlay math:** CardView uses `imgRef` and `imageContainerRef` and prefers `img.getBoundingClientRect()` to compute precise overlay positions so saved `bbox` values remain correct across CSS scaling and letterboxing.
 - **Resize/Scroll robustness:** The component uses `ResizeObserver` (when available) and scroll capture listeners to recompute overlay positions on window resize and scroll. When mounted inside `BingoCardView` it dispatches a short mount-time tick to ensure overlays align immediately on entering fullscreen.
 - **Dab visuals:** Dabbed cells render a rounded ink-drop visual (radial gradient, inner highlight, and depth) to mimic an actual dabber mark.
-- **Player labels:** If `grid.playerOverlay` is present, CardView renders row/column labels using normalized centers or pixel offsets saved by the designer to ensure label placement matches the designer preview.
+- **Player labels:** If `grid.playerOverlay` is present, CardView renders row/column labels using normalized centers or pixel offsets saved by the designer to ensure label placement matches the designer preview. Clicking a player label will toggle the entire row/column if `onToggleDabLine` is provided by the parent (useful for quickly toggling full rows/cols); label clicks stop event propagation so they don't trigger other overlay interactions.
 - **Defensive styling:** Numeric values used in inline styles are guarded against `NaN`/missing values to avoid console warnings.
 
 ---
