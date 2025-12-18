@@ -28,7 +28,7 @@
 
 **Audio & Visuals**
 - Rolling draw sound: prefers `src/utils/ballsincage.wav` if present; falls back to a synthetic rolling noise generator.
-- Win chime: prefers `src/utils/Bingo Tusch.mp3` if present; falls back to WebAudio synthesized chime.
+- Win chime: prefers `src/utils/BingoTusch.mp3` if present; falls back to WebAudio synthesized chime.
 - A single topbar Sound toggle (persisted) controls all app audio.
 
 **Language data**

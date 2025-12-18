@@ -17,7 +17,7 @@
 
 ## Behavior
 - Renders a modal with a message such as "<player> has bingo!" or "Row N has bingo!".
-- On open, the component will attempt to play the bundled `src/utils/Bingo Tusch.mp3` (if present) or fall back to a synthesized chime. The sound respects the global `settings.soundEnabled` flag.
+- On open, the component will attempt to play the bundled `src/utils/BingoTusch.mp3` (if present) or fall back to a synthesized chime. The sound respects the global `settings.soundEnabled` flag.
 - When in the fullscreen `BingoCardView`, the modal appears within the wrapper so confetti from `BingoCardView` is visible above the app UI.
 
 ---

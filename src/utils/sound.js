@@ -1,5 +1,5 @@
 // If a bundled audio file is present, prefer it for the win chime; otherwise fallback to WebAudio synthesis.
-import winSoundUrl from './Bingo Tusch.mp3'
+import winSoundUrl from './BingoTusch.mp3'
 import rollingSoundUrl from './ballsincage.wav'
 
 // internal synthesized chime (fallback)
